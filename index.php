@@ -2,20 +2,37 @@
 session_start();
 require './config/config.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = md5($_POST['password']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username']); // Élimine les espaces inutiles
+    $password = $_POST['password'];
 
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username AND password = :password");
-    $stmt->execute(['username' => $username, 'password' => $password]);
-    $user = $stmt->fetch();
-
-    if ($user) {
-        $_SESSION['user_id'] = $user['id'];
-        header('Location: dashboard.php');
-        exit();
+    // Vérifie que les champs ne sont pas vides
+    if (empty($username) || empty($password)) {
+        $error_message = "Veuillez remplir tous les champs.";
     } else {
-        $error_message = "Identifiant ou mot de passe incorrect.";
+        try {
+            // Prépare la requête pour récupérer l'utilisateur
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username");
+            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+            $stmt->execute();
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                // Authentification réussie
+                $_SESSION['user_id'] = $user['id'];
+
+                // Redirige vers le tableau de bord
+                header('Location: dashboard.php');
+                exit();
+            } else {
+                // Authentification échouée
+                $error_message = "Identifiant ou mot de passe incorrect.";
+            }
+        } catch (Exception $e) {
+            // Log l'erreur pour analyse (sans afficher au client)
+            error_log($e->getMessage());
+            $error_message = "Une erreur est survenue. Veuillez réessayer plus tard.";
+        }
     }
 }
 ?>
@@ -121,16 +138,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="login-container">
-        <h1>Connexion</h1>
-        <?php if (isset($error_message)): ?>
-            <div class="error-message"><?php echo htmlspecialchars($error_message); ?></div>
-        <?php endif; ?>
-        <form method="post" action="index.php">
-            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-            <input type="password" name="password" placeholder="Mot de passe" required>
-            <button type="submit">Se connecter</button>
-        </form>
-        <a href="index.php" class="back-link">Retour</a>
+            <h1>Connexion</h1>
+            <?php if (isset($error_message)): ?>
+                <div class="error-message"><?php echo htmlspecialchars($error_message); ?></div>
+            <?php endif; ?>
+            <form method="post" action="index.php">
+                <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
+                <button type="submit">Se connecter</button>
+            </form>
     </div>
 </body>
 </html>
