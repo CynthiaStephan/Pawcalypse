@@ -1,0 +1,32 @@
+services:
+ php:
+  build: .
+  container_name: pawcalypse_php
+  depends_on:
+   - db
+  volumes:
+   - .:/var/www/html/
+  ports:
+   - 80:80
+  networks:
+      - dev-php
+ db:
+  container_name: pawcalypse_now_mysql
+  image: mysql:8.0
+  command: --default-authentication-plugin=mysql_native_password
+  environment:
+   MYSQL_ROOT_PASSWORD: rootpass
+   MYSQL_DATABASE: catworlddb
+   MYSQL_USER: devuser
+   MYSQL_PASSWORD: devpass
+  volumes:
+   - ./mysql/mysql_custom.cnf:/etc/mysql/conf.d/mysql_custom.cnf
+   - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  ports:
+   - 9906:3306
+  networks:
+    - dev-php
+    
+networks:
+  dev-php:
+    driver: bridge
