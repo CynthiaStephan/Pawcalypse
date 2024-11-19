@@ -5,16 +5,21 @@ namespace App;
 class Router {
     private array $routes = [];
 
-    public function __construct() {
-        
-    }
-
-    // Ajouter une route
+    /**
+     * Add new route with index and callback to array routes
+     * @param string $path
+     * @param array $callback
+     * @return void
+     */
     public function add($path, $callback) {
         $this->routes[$path] = $callback;
     }
-    
-    // Dispatch la requête vers la bonne méthode
+
+    /**
+     * Dispatch url to controller method
+     * @param string $uri
+     * @return void
+     */
     public function dispatch($uri) {
         $path = parse_url($uri, PHP_URL_PATH);
 
@@ -32,7 +37,11 @@ class Router {
         }
     }
 
-    // Gestion des erreurs 404
+    /**
+     * Send http response and message
+     * @param string $message
+     * @return void
+     */
     private function sendNotFound($message) {
         http_response_code(404);
         echo "<h1>404 Not Found</h1><p>$message</p>";
