@@ -17,7 +17,6 @@ class UserController {
 
         echo $this->twig->render('users/list.twig', ['users' => $users]);
     }
-
     public function detail() {
         $userId = $_GET['id'] ?? null;
 

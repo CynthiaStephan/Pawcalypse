@@ -16,9 +16,12 @@ class AdminRoutes
         $this->twig = $twig;
     }
 
+    /**
+     * Summary of setRoutes
+     * @return void
+     */
     function setRoutes() {
         $twig = $this->twig;
-        // Configurer les routes avec closures
         $this->router->add('/', function () use ($twig) {
             $controller = new LoginController($twig);
             $controller->index();

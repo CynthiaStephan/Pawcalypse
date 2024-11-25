@@ -1,102 +1,45 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle, #1a1a1a, #000000);
-            color: #ff004c;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+<?php
+require_once './autoload.php';
+$error_message = null;
 
-        .login-container {
-            text-align: center;
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #ff004c;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 20px #ff004c;
-            width: 400px;
-        }
+if (!empty($_SESSION)) {
+    header('Location: dashboard.php');
+}
 
-        h1 {
-            color: #ff004c;
-            margin-bottom: 1rem;
-            text-shadow: 0 0 10px #ff004c;
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username']); // Élimine les espaces inutiles
+    $password = $_POST['password'];
 
-        .login-container form {
-            display: flex;
-            flex-direction: column;
-        }
+    // Vérifie que les champs ne sont pas vides
+    if (empty($username) || empty($password)) {
+        $error_message = "Veuillez remplir tous les champs.";
+    } else {
+        try {
+            // Prépare la requête pour récupérer l'utilisateur
+            $user = getUser($username, $pdo);
 
-        input[type="text"], input[type="password"] {
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border: 1px solid #ff004c;
-            border-radius: 5px;
-            background: #1a1a1a;
-            color: #ff004c;
-            font-size: 1rem;
+            if ($user && password_verify($password, $user['password'])) {
+                // Authentification réussie
+                $_SESSION['user'] = [
+                    'id' => $user['id'],
+                ];
+                header('Location: dashboard.php');
+            } else {
+                // Authentification échouée
+                $error_message = "Identifiant ou mot de passe incorrect.";
+            }
+        } catch (Exception $e) {
+            // Log l'erreur pour analyse (sans afficher au client)
+            error_log($e->getMessage());
+            $error_message = "Une erreur est survenue. Veuillez réessayer plus tard.";
         }
+    }
+}
+?>
 
-        button {
-            background: linear-gradient(to right, #ff004c, #8b0000);
-            color: black;
-            border: none;
-            padding: 0.75rem;
-            margin-top: 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            text-transform: uppercase;
-            box-shadow: 0 0 10px #ff004c;
-        }
+<?php include './templates/header.php';?>
 
-        button:hover {
-            background: linear-gradient(to right, #8b0000, #ff004c);
-            box-shadow: 0 0 15px #ff004c;
-        }
 
-        .error-message {
-            color: #ff004c;
-            margin-top: 1rem;
-            text-shadow: 0 0 10px #ff004c;
-        }
-
-        .back-link {
-            margin-top: 1rem;
-            display: inline-block;
-            text-decoration: none;
-            color: #ff004c;
-            font-weight: bold;
-            text-shadow: 0 0 10px #ff004c;
-        }
-
-        .back-link:hover {
-            color: #8b0000;
-        }
-
-        @keyframes glow {
-            0% { box-shadow: 0 0 10px #ff004c; }
-            50% { box-shadow: 0 0 20px #8b0000; }
-            100% { box-shadow: 0 0 10px #ff004c; }
-        }
-
-        button {
-            animation: glow 1.5s infinite alternate;
-        }
-    </style>
-</head>
 <body>
     <div class="login-container">
             <h1>Connexion</h1>
@@ -107,4 +50,5 @@
             </form>
     </div>
 </body>
-</html>
+
+<?php include './templates/footer.php';?>

@@ -1,232 +1,31 @@
 <?php
-session_start();
-require './config/config.php';
+require_once './autoload.php';
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']['id'])) {
     header('Location: index.php');
-    exit();
+    exit;
 }
 
-// Récupération des données
-$resources = $pdo->query("SELECT * FROM resources")->fetchAll();
-$missions = $pdo->query("SELECT * FROM missions")->fetchAll();
+$message = null;
+
+if (isset($_GET['message'])) {
+    $message = $_GET['message'];
+}
+
+$resources = getRessoures($pdo);
+$missions = getMissions($pdo);
+
 // Calcul du pourcentage d'invasion
-$total_missions = $pdo->query("SELECT COUNT(*) as total FROM missions")->fetch()['total'];
-$completed_missions = $pdo->query("SELECT COUNT(*) as completed FROM missions WHERE status = 'terminée'")->fetch()['completed'];
+$total_missions = totalMission($pdo);
+$completed_missions = totalMissionCompleted($pdo);
 
 $invasion_percentage = ($total_missions > 0) ? ($completed_missions / $total_missions) * 100 : 0;
 
 ?>
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pawcalypse Now !</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <style>
+<?php include './templates/header.php';?>
 
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background: radial-gradient(circle, #1a1a1a, #000000);
-            color: #ff004c;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background: linear-gradient(to right, #8b0000, #ff004c, #8b0000);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            text-shadow: 2px 2px 10px #ff004c;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 0 15px #ff004c;
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: #fff;
-            text-shadow: 1px 1px 5px #717171;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2rem 0;
-            color: white;
-        }
-
-        table th, table td {
-            padding: 0.75rem;
-            text-align: center;
-            border: 1px solid #ff004c;
-        }
-
-        table th {
-            background-color: rgba(255, 0, 76, 0.2);
-        }
-
-        table td {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        input[type="number"], input[type="text"], select {
-            padding: 0.5rem;
-            border: 1px solid #ff004c;
-            background: #1a1a1a;
-            color: #ff004c;
-            border-radius: 5px;
-            width: 90%;
-            margin: 0.5rem auto;
-        }
-        
-        button {
-            background: linear-gradient(to right, #ff004c, #8b0000);
-            color: black;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            text-transform: uppercase;
-            box-shadow: 0 0 10px #ff004c;
-        }
-
-        button:hover {
-            background: linear-gradient(to right, #8b0000, #ff004c);
-            box-shadow: 0 0 15px #ff004c;
-        }
-
-        .logout a {
-            color: #ff004c;
-            text-decoration: none;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 1rem;
-            text-shadow: 0 0 10px #ff004c;
-        }
-
-        .logout a:hover {
-            color: #8b0000;
-        }
-        .invasion-progress {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #fff;
-        }
-
-        .progress-bar-container {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #ff004c;
-            border-radius: 10px;
-            width: 80%;
-            margin: 0 auto;
-            height: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background: linear-gradient(to right, #ff004c, #8b0000);
-            height: 100%;
-            transition: width 0.5s ease-in-out;
-            box-shadow: 0 0 15px #ff004c;
-        }
-
-        .progress-percentage {
-            margin-top: 10px;
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px #ff004c;
-        }
-
-
-        /* Animation */
-        @keyframes glow {
-            0% { box-shadow: 0 0 10px #ff004c; }
-            50% { box-shadow: 0 0 20px #8b0000; }
-            100% { box-shadow: 0 0 10px #ff004c; }
-        }
-
-        table {
-            animation: glow 2s infinite alternate;
-        }
-
-        button {
-            animation: glow 1.5s infinite alternate;
-        }
-        .hologram-container {
-            display: flex;
-            justify-content: center;
-            text-align: center;
-            margin: 2rem 0;
-            position: relative;
-        }
-
-        #earth {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: transparent url("https://i.imgur.com/Qk4UXcU.png");
-            background-size: cover;
-            box-shadow: inset 0px -20px 50px 10px #00ffff80,
-                0px 0px 30px 6px #00ffff70;
-            transform-style: preserve-3d;
-            transform: rotate(20deg);
-            animation: rotate 15s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% {
-                background-position: 0 0;
-            }
-
-            100% {
-                background-position: 530px 0;
-            }
-        }
-
-        .invasion-percentage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.8rem;
-            color: #00ffff;
-            text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff80;
-            animation: pulse 2s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: translate(-50%, -50%) scale(1);
-                text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff80;
-            }
-
-            100% {
-                transform: translate(-50%, -50%) scale(1.1);
-                text-shadow: 0 0 30px #00ffff, 0 0 50px #00ffffa0;
-            }
-        }
-        
-    </style>
-</head>
-<body>
+<body class="dashboard">
     <header>
         <h1>Pawcalypse Now !</h1>
     </header>
@@ -322,8 +121,9 @@ $invasion_percentage = ($total_missions > 0) ? ($completed_missions / $total_mis
         </form>
 
         <div class="logout">
-            <a href="/logout">Déconnexion</a>
+            <a href="logout.php">Déconnexion</a>
         </div>
     </div>
 </body>
-</html>
+
+<?php include './templates/footer.php';?>
