@@ -8,7 +8,7 @@ class Router {
     /**
      * Add new route with index and callback to array routes
      * @param string $path
-     * @param array $callback
+     * @param callable $callback
      * @return void
      */
     public function add($path, $callback) {
