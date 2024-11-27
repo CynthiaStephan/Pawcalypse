@@ -1,17 +1,18 @@
 services:
  php:
   build: .
-  container_name: pawcalypse_php
+  container_name: pawcalypse
   depends_on:
    - db
   volumes:
    - .:/var/www/html/
+   - /var/www/html/vendor
   ports:
    - 80:80
   networks:
       - dev-php
  db:
-  container_name: pawcalypse_now_mysql
+  container_name: pawcalypse_mysql
   image: mysql:8.0
   command: --default-authentication-plugin=mysql_native_password
   environment:
