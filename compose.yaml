@@ -1,32 +1,33 @@
 services:
- php:
-  build: .
-  container_name: pawcalypse
-  depends_on:
-   - db
-  volumes:
-   - .:/var/www/html/
-   - /var/www/html/vendor
-  ports:
-   - 80:80
-  networks:
+  php:
+    build: .
+    container_name: pawcalypse
+    depends_on:
+      - db
+    volumes:
+      - .:/var/www/html/
+      - /var/www/html/vendor
+    ports:
+      - 80:80
+    networks:
       - dev-php
- db:
-  container_name: pawcalypse_mysql
-  image: mysql:8.0
-  command: --default-authentication-plugin=mysql_native_password
-  environment:
-   MYSQL_ROOT_PASSWORD: rootpass
-   MYSQL_DATABASE: catworlddb
-   MYSQL_USER: devuser
-   MYSQL_PASSWORD: devpass
-  volumes:
-   - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-  ports:
-   - 9906:3306
-  networks:
-    - dev-php
-    
+
+  db:
+    container_name: pawcalypse-mysql
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: catworlddb
+      MYSQL_USER: devuser
+      MYSQL_PASSWORD: devpass
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 9906:3306
+    networks:
+      - dev-php
+
 networks:
   dev-php:
     driver: bridge
