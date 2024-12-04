@@ -18,7 +18,7 @@ class Database{
         $this->db_host = $db_host;
     }
 
-    private function getPDO(){
+    private function getPDO(): PDO{
         if ($this->pdo === null) {
             try {
                 $this->pdo = new PDO("mysql:host={$this->db_host};dbname={$this->bd_name}", $this->db_user, $this->db_pass);
@@ -31,13 +31,27 @@ class Database{
         return $this->pdo;
     }
 
-    public function query(string $stmt): array {
+     public function executeQuery(string $sql, array $params = []): mixed {
         try {
-            $req = $this->getPDO()->query($stmt);
-            return $req->fetchAll(PDO::FETCH_ASSOC);
+            $pdo = $this->getPDO();
+            $stmt = $pdo->prepare($sql);
+            
+            // Lier les paramètres par la value
+            foreach ($params as $key => $value) {
+                $stmt->bindValue(":$key", $value);
+            }
+            
+            $stmt->execute();
+
+            // Si sql contient SELECT -> renvoie les données récupérés
+            if (stripos($sql, 'SELECT') === 0) {
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+            http_response_code(200);
+            return true; 
         } catch (PDOException $error) {
             http_response_code(500);
-            die("Erreur lors de l'exécution de la requette". $error->getMessage());
+            die("Erreur lors de l'exécution de la requête : " . $error->getMessage());
         }
     }
 
