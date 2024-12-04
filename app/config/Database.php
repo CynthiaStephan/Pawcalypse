@@ -36,13 +36,11 @@ class Database{
             $pdo = $this->getPDO();
             $stmt = $pdo->prepare($sql);
             
-            // Lier les paramètres par la value
+            // Utiliser une boucle pour lier les parametres
             foreach ($params as $key => $value) {
                 $stmt->bindValue(":$key", $value);
             }
-            
             $stmt->execute();
-
             // Si sql contient SELECT -> renvoie les données récupérés
             if (stripos($sql, 'SELECT') === 0) {
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
