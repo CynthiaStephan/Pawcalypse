@@ -10,8 +10,11 @@ class LoginController
         $this->twig = $twig;
     }
     public function index() {
+
+        // TODO: Faire ma logique de récupération des info utilisateur. 
         session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             header('Location: /dashboard');
         }
         echo $this->twig->render('auth/login.html.twig');

@@ -22,14 +22,17 @@ class AdminRoutes
      */
     function setRoutes() {
         $twig = $this->twig;
+
         $this->router->add('/', function () use ($twig) {
             $controller = new LoginController($twig);
             $controller->index();
         });
+
         $this->router->add('/dashboard', function () use ($twig) {
             $controller = new AdminController($twig);
             $controller->index();
         });
+        
         $this->router->add('/logout', function () use ($twig) {
             $controller = new LoginController($twig);
             $controller->logout();
