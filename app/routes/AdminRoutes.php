@@ -4,7 +4,6 @@ namespace App\Routes;
 
 use App\Controllers\AdminController;
 use App\Controllers\LoginController;
-use App\Controllers\UserController;
 use App\Router;
 
 class AdminRoutes
@@ -36,11 +35,6 @@ class AdminRoutes
         $this->router->add('/logout', function () use ($twig) {
             $controller = new LoginController($twig);
             $controller->logout();
-        });
-
-        $this->router->add('/users/detail', function () use ($twig) {
-            $controller = new UserController($twig);
-            $controller->detail();
         });
     }
 }

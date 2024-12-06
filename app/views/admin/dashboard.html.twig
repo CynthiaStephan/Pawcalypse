@@ -1,31 +1,9 @@
-<?php
-require_once './autoload.php';
+{% extends "base.html.twig" %}
 
-if (!isset($_SESSION['user']['id'])) {
-    header('Location: index.php');
-    exit;
-}
+{% block title %}Tableau de bord{% endblock %}
 
-$message = null;
+{% block content %}
 
-if (isset($_GET['message'])) {
-    $message = $_GET['message'];
-}
-
-$resources = getRessoures($pdo);
-$missions = getMissions($pdo);
-
-// Calcul du pourcentage d'invasion
-$total_missions = totalMission($pdo);
-$completed_missions = totalMissionCompleted($pdo);
-
-$invasion_percentage = ($total_missions > 0) ? ($completed_missions / $total_missions) * 100 : 0;
-
-?>
-
-<?php include './templates/header.php';?>
-
-<body class="dashboard">
     <header>
         <h1>Pawcalypse Now !</h1>
     </header>
@@ -34,7 +12,7 @@ $invasion_percentage = ($total_missions > 0) ? ($completed_missions / $total_mis
         <div class="hologram-container">
             <div id="earth"></div>
             <div class="invasion-percentage">
-                <?php echo number_format($invasion_percentage, 2); ?>% Invasion Réussie
+                {{invasion}}% Invasion Réussie
             </div>
         </div>
 
@@ -42,7 +20,6 @@ $invasion_percentage = ($total_missions > 0) ? ($completed_missions / $total_mis
 
         <!-- Gestion des stocks -->
         <h2>Gestion des Stocks</h2>
-        <form method="post" action="/functions/update_resources.php">
             <table>
                 <thead>
                     <tr>
@@ -53,21 +30,23 @@ $invasion_percentage = ($total_missions > 0) ? ($completed_missions / $total_mis
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($resources as $resource): ?>
+                {% for ressource in ressources %}
+                    
                         <tr>
-                            <td><?php echo htmlspecialchars($resource['resource_name']); ?></td>
-                            <td><?php echo htmlspecialchars($resource['quantity']); ?></td>
-                            <td>
-                                <input type="number" name="new_quantity[<?php echo $resource['id']; ?>]" min="0">
-                            </td>
-                            <td>
-                                <button type="submit" name="update_resource" value="<?php echo $resource['id']; ?>">Mettre à jour</button>
-                            </td>
+                            <form method="post">
+                                <td>{{ressource.ressource_name}}</td>
+                                <td>{{ressource.quantity}}</td>
+                                <td>
+                                    <input type="number" name="update_ressource[new_quantity]" min="10" required>
+                                </td>
+                                <td>
+                                    <button type="submit" name="update_ressource[id]" value="{{ressource.id}}">Mettre à jour</button>
+                                </td>
+                            </form>
                         </tr>
-                    <?php endforeach; ?>
+                {% endfor %}
                 </tbody>
             </table>
-        </form>
 
         <!-- Gestion des missions -->
         <h2>Gestion des Missions</h2>
@@ -80,50 +59,59 @@ $invasion_percentage = ($total_missions > 0) ? ($completed_missions / $total_mis
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($missions as $mission): ?>
+
+            {% for mission in missions %}
+                
                     <tr>
-                        <td><?php echo htmlspecialchars($mission['mission_name']); ?></td>
-                        <td><?php echo htmlspecialchars($mission['status']); ?></td>
+                        <td>{{ mission.mission_name }}</td>
+                        <td>{{ mission.status }}</td>
                         <td>
-                            <form method="post" action="/functions/update_missions.php">
-                                <select name="new_status">
-                                    <option value="planifiée" <?php echo $mission['status'] === 'planifiée' ? 'selected' : ''; ?>>Planifiée</option>
-                                    <option value="en cours" <?php echo $mission['status'] === 'en cours' ? 'selected' : ''; ?>>En cours</option>
-                                    <option value="terminée" <?php echo $mission['status'] === 'terminée' ? 'selected' : ''; ?>>Terminée</option>
+                            <form method="post">
+                                <select name="update_mission[new_status]">
+                                    <option value="planifiée" {{ mission.status == 'planifiée' ? 'selected' : ''}}>Planifiée</option>
+                                    <option value="en cours" {{ mission.status == 'en cours' ? 'selected' : ''}}>En cours</option>
+                                    <option value="terminée" {{ mission.status == 'terminée' ? 'selected' : ''}}>Terminée</option>
                                 </select>
-                                <input type="hidden" name="mission_id" value="<?php echo $mission['id']; ?>">
+                                <input type="hidden" name="update_mission[mission_id]" value="{{mission.id}}">
                                 <button type="submit">Mettre à jour</button>
                             </form>
                         </td>
                     </tr>
-                <?php endforeach; ?>
+            {% endfor %}
             </tbody>
         </table>
 
 
         <!-- Ajouter une nouvelle mission -->
         <h2>Lancer une Nouvelle Mission</h2>
-        <form method="post" action="/functions/add_mission.php">
+        <form method="post">
             <label for="mission_name">Nom de la Mission :</label>
-            <input type="text" id="mission_name" name="mission_name" required>
+            <input type="text" id="mission_name" name="add_mission[mission_name]" required>
             
-            <label for="resource_id">Allouer une Ressource :</label>
-            <select id="resource_id" name="resource_id" required>
-                <?php foreach ($resources as $resource): ?>
-                    <option value="<?php echo $resource['id']; ?>"><?php echo htmlspecialchars($resource['resource_name']); ?></option>
-                <?php endforeach; ?>
+            <label for="ressource_id">Allouer une Ressource :</label>
+            <select id="ressource_id" name="add_mission[ressource_id]" required>
+                {% for ressource in ressources %}
+                    <option value="{{ressource.id}}">{{ressource.ressource_name}}</option>
+                {% endfor %}
             </select>
             
-            <label for="resource_quantity">Quantité :</label>
-            <input type="number" id="resource_quantity" name="resource_quantity" min="1" required>
+            <label for="ressource_quantity">Quantité :</label>
+            <input type="number" id="ressource_quantity" name="add_mission[ressource_quantity]" min="1" required>
             
             <button type="submit">Créer Mission</button>
         </form>
 
         <div class="logout">
-            <a href="logout.php">Déconnexion</a>
+            <a href="logout">Déconnexion</a>
         </div>
     </div>
-</body>
 
-<?php include './templates/footer.php';?>
+{% endblock %}
+
+{% block javascript %}
+    {{parent()}}
+    <script>
+        console.log('hello');
+        
+    </script>
+{% endblock %}
