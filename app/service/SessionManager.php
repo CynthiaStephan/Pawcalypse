@@ -4,7 +4,7 @@ namespace App\Services;
 
 class SessionManager
 {
-    public  static function init() : void
+    public static function sessionInit() : void
     {
         $sessionConfig = [
             'lifetime' => 3600,

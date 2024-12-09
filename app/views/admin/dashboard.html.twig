@@ -30,17 +30,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                {% for ressource in ressources %}
+                {% for resource in resources %}
                     
                         <tr>
                             <form method="post">
-                                <td>{{ressource.ressource_name}}</td>
-                                <td>{{ressource.quantity}}</td>
+                                <td>{{resource.resource_name}}</td>
+                                <td>{{resource.quantity}}</td>
                                 <td>
-                                    <input type="number" name="update_ressource[new_quantity]" min="10" required>
+                                    <input type="number" name="update_resource[new_quantity]" min="10" required>
                                 </td>
                                 <td>
-                                    <button type="submit" name="update_ressource[id]" value="{{ressource.id}}">Mettre à jour</button>
+                                    <button type="submit" name="update_resource[id]" value="{{resource.id}}">Mettre à jour</button>
                                 </td>
                             </form>
                         </tr>
@@ -88,15 +88,15 @@
             <label for="mission_name">Nom de la Mission :</label>
             <input type="text" id="mission_name" name="add_mission[mission_name]" required>
             
-            <label for="ressource_id">Allouer une Ressource :</label>
-            <select id="ressource_id" name="add_mission[ressource_id]" required>
-                {% for ressource in ressources %}
-                    <option value="{{ressource.id}}">{{ressource.ressource_name}}</option>
+            <label for="resource_id">Allouer une Resource :</label>
+            <select id="resource_id" name="add_mission[resource_id]" required>
+                {% for resource in resources %}
+                    <option value="{{resource.id}}">{{resource.resource_name}}</option>
                 {% endfor %}
             </select>
             
-            <label for="ressource_quantity">Quantité :</label>
-            <input type="number" id="ressource_quantity" name="add_mission[ressource_quantity]" min="1" required>
+            <label for="resource_quantity">Quantité :</label>
+            <input type="number" id="resource_quantity" name="add_mission[resource_quantity]" min="1" required>
             
             <button type="submit">Créer Mission</button>
         </form>

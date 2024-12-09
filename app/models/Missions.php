@@ -10,33 +10,37 @@ class Missions {
         $this->db = new Database();
     }
 
-    function getMissions() :mixed {
+    function getMissions() : mixed {
         $sql = "SELECT * FROM missions";
         $params = [];
         return $this->db->executeQuery($sql, $params);        
     }
 
-    function createMission($mission_name) :void {
-        $sql = "INSERT INTO mission (mission_name) VALUES (:mission_name)";
+    function createMission($mission_name) : int {
+        $sql = "INSERT INTO missions (mission_name) VALUES (:mission_name)";
         $params = ['mission_name' => $mission_name];
         $this->db->executeQuery($sql, $params);
+        $lastId = $this->db->getLastInsertId();
+        return $lastId;
     }
 
-    function updateMission($id) :void {
+    function updateMission($id, $new_status) : void {
         $sql = "UPDATE missions SET status = :status WHERE id = :id";
-        $params = ['id' => $id];
+        $params = ['id' => $id, 'status'=> $new_status];
         $this->db->executeQuery($sql, $params);
     }
 
-    function totalMission() :void {
+    function totalMission() : mixed {
         $sql = "SELECT COUNT(*) as total FROM missions";
         $params = [];
-        $this->db->executeQuery($sql, $params);
+        $result = $this->db->executeQuery($sql, $params);
+        return $result[0]['total'] ?? 0;
     }
 
-    function totalMissionCompleted() :void {
+    function totalMissionCompleted() : mixed {
         $sql = "SELECT COUNT(*) as completed FROM missions WHERE status = 'terminée'";
         $params = [];
-        $this->db->executeQuery($sql, $params);
+        $result = $this->db->executeQuery($sql, $params);
+        return $result[0]['completed'] ?? 0;
     }
 }

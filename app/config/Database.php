@@ -2,6 +2,7 @@
 
 namespace App\Config;
 
+use Exception;
 use \PDO;
 use \PDOException;
 
@@ -30,8 +31,13 @@ class Database{
         }
         return $this->pdo;
     }
-
-     public function executeQuery(string $sql, array $params = []): mixed {
+    /**
+     * Execute the SQL request
+     * @param string $sql
+     * @param array $params
+     * @return mixed
+     */
+    public function executeQuery(string $sql, array $params = []): mixed {
         try {
             $pdo = $this->getPDO();
             $stmt = $pdo->prepare($sql);
@@ -40,16 +46,32 @@ class Database{
             foreach ($params as $key => $value) {
                 $stmt->bindValue(":$key", $value);
             }
+
             $stmt->execute();
             // Si sql contient SELECT -> renvoie les données récupérés
             if (stripos($sql, 'SELECT') === 0) {
                 return $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
+
             http_response_code(200);
             return true; 
+
         } catch (PDOException $error) {
             http_response_code(500);
             die("Erreur lors de l'exécution de la requête : " . $error->getMessage());
+        }
+    }
+
+    /**
+     * Return the id of the last insert element
+     * @return int
+     */
+    public function getLastInsertId(): int {
+        try {
+            $pdo = $this->getPDO();
+            return(int)$pdo->lastInsertId();
+        } catch (PDOException $error) {
+            die("Erreur lors de la récupération de l'id :  " . $error->getMessage());
         }
     }
 

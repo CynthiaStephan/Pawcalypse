@@ -46,7 +46,7 @@
 - Migrer les paramètres utiles de `old/config/config.php` vers une structure propre dans le projet principal.
 
 ### Migration des anciens modèles
-- Réécrire les modèles de `old/models` (`Missions.php`, `Ressources.php`, etc.) en suivant une approche orientée objet.
+- Réécrire les modèles de `old/models` (`Missions.php`, `Resources.php`, etc.) en suivant une approche orientée objet.
 - Regrouper les modèles dans `app/models` avec des entités correspondant aux tables de la base de données.
 - Vérifier les requêtes SQL dans les anciens modèles et les adapter pour PDO si nécessaire.
 

@@ -1,6 +1,4 @@
 <?php
-// TODO Je n'arrive pas a afficher les missions et ressources. 
-// [x] Attention récupération de lastid avec ma la façon que j'ai construit ma classe Database.
 
 namespace App\Controllers;
 
@@ -39,8 +37,7 @@ class AdminController {
                     $resource_quantity = intval($_POST['add_mission']['resource_quantity']);
                 
                     // Vérifier si la resource est disponible en quantité suffisante
-                    $resource = $this->resource->getResource($resource_id);
-                
+                    $resource = $this->resource->getResource($resource_id)[0];
                     if ($resource && $resource['quantity'] >= $resource_quantity) {
                 
                         $this->resource->updateResource($resource_id,$resource_quantity);
@@ -63,7 +60,6 @@ class AdminController {
                         'planifiée',
                         'en cours',
                         'terminée'
-                
                     ];
                 
                     if (!in_array($new_status,$allowed_status)) {
@@ -100,6 +96,7 @@ class AdminController {
         
         $resources = $this->resource->getResources();
         $missions = $this->mission->getMissions();
+
         
         // Calcul du pourcentage d'invasion
         $total_missions = $this->mission->totalMission();
