@@ -58,7 +58,7 @@ class Database{
 
         } catch (PDOException $error) {
             http_response_code(500);
-            die("Erreur lors de l'exécution de la requête : " . $error->getMessage());
+            die("Erreur lors de l'exécution de la requête : " . $error);
         }
     }
 

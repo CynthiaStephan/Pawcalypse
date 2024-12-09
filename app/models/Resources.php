@@ -15,7 +15,7 @@ class Resources{
      *
      * @return array The list of resources.
      */
-    public function getResources() : array {
+    public function getResources(): array {
         $sql = "SELECT * FROM resources";
         $params = [];
         return $this->db->executeQuery($sql, $params);
@@ -27,7 +27,7 @@ class Resources{
      * @param int $resource_id
      * @return mixed
      */
-    public function getResource($resource_id) : mixed {
+    public function getResource($resource_id): mixed {
 
         $sql = "SELECT quantity FROM resources WHERE id = :resource_id";
         $params = ['resource_id' => $resource_id];
@@ -40,7 +40,7 @@ class Resources{
      * @param mixed $resource_quantity
      * @return void
      */
-    public function updateResource($resource_id, $resource_quantity, $substract = true) : void {
+    public function updateResource($resource_id, $resource_quantity, $substract = true): void {
         if (!$substract) {
             $resource_quantity *= -1;
         }
@@ -56,10 +56,10 @@ class Resources{
      * @param mixed $resource_quantity
      * @return void
      */
-    public function createResourceUsage($mission_id, $resource_id, $resource_quantity) : void {
+    public function createResourceUsage($mission_id, $resource_id, $resource_quantity): void {
 
         $sql = "INSERT INTO resource_usage (mission_id, resource_id, quantity_used) VALUES (:mission_id, :resource_id, :quantity_used)";
-        $params = ['mission_id' => $mission_id, 'resource_id' => $resource_id,'resource_quantity'=> $resource_quantity];
+        $params = ['mission_id' => $mission_id, 'resource_id' => $resource_id,'quantity_used'=> $resource_quantity];
         $this->db->executeQuery($sql, $params);
     }
 
